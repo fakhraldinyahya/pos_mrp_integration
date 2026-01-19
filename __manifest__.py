@@ -12,7 +12,6 @@
     ],
     'data': [
         'views/product_templet_views.xml',
-
     ],
     'description': """
 POS Manufacturing Integration
