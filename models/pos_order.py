@@ -129,10 +129,11 @@ class PosOrder(models.Model):
 
                 # Create the Manufacturing Order
                 mo = MrpProduction.with_company(company).create(mo_vals)
-                
-                # Auto-Process the Lifecycle
                 mo.action_confirm()      # Reserves components
-                mo.button_mark_done()    # Completes production and moves stock
+                if mo.components_availability_state != 'unavailable':
+                    mo.button_mark_done()    # Completes production and moves stock
+                    if mo.product_id.cost_method == 'standard':
+                        mo.product_id.action_bom_cost()
 
     def action_view_mrp_orders(self):
         """
