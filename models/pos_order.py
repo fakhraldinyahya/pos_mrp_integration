@@ -29,13 +29,14 @@ class PosOrder(models.Model):
         """
         for order in self:
             # 1. Identify products that require manufacturing
-            mrp_products = order.lines.mapped('product_id').filtered('to_manufacture')
+            mrp_products = order.lines.mapped('product_id').filtered('mrp_from_pos')
             
             if not mrp_products:
                 continue
 
             # 2. Batch search for active BoMs for these products under the current company
-            boms_by_product = self.env['mrp.bom']._bom_find(mrp_products, company_id=order.company_id.id)
+            picking_type = order.picking_type_id.warehouse_id.manu_type_id
+            boms_by_product = self.env['mrp.bom']._bom_find(mrp_products, company_id=order.company_id.id, picking_type=picking_type, bom_type='normal')
 
             # 3. Validation: Ensure every manufacturing product has a found BoM
             for product in mrp_products:
@@ -68,7 +69,7 @@ class PosOrder(models.Model):
     def _create_mrp_from_pos(self):
         """
         Generates Manufacturing Orders (MO) for POS order lines that contain 
-        products marked as 'to_manufacture'.
+        products marked as 'mrp_from_pos'.
         
         Logic:
         1. Iterates through order lines.
@@ -89,13 +90,18 @@ class PosOrder(models.Model):
                 product = line.product_id
 
                 # Skip products that don't need manufacturing
-                if not product.to_manufacture:
+                if not product.mrp_from_pos:
                     continue
 
                 company = order.company_id
 
+                # Determine the Manufacturing Operation Type from the warehouse config
+                picking_type = order.picking_type_id.warehouse_id.manu_type_id
+                if not picking_type:
+                    raise UserError(_("No Manufacturing Operation Type configured for warehouse '%s'.") % order.picking_type_id.warehouse_id.name)
+                
                 # Find the most suitable BoM for this product/variant in this company
-                boms = MrpBom._bom_find(product, company_id=company.id)
+                boms = MrpBom._bom_find(product, company_id=company.id, picking_type=picking_type, bom_type='normal')
                 bom = boms.get(product)
 
                 # Critical check: BoM must exist
@@ -105,10 +111,6 @@ class PosOrder(models.Model):
                         "Please check the Manufacturing configuration."
                     ) % product.display_name)
 
-                # Determine the Manufacturing Operation Type from the warehouse config
-                picking_type = order.picking_type_id.warehouse_id.manu_type_id
-                if not picking_type:
-                    raise UserError(_("No Manufacturing Operation Type configured for warehouse '%s'.") % order.picking_type_id.warehouse_id.name)
 
                 # Prepare MO values
                 # We use specific source/dest locations from the operation type
