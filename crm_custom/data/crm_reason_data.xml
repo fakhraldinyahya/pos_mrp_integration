@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Won Reasons -->
+        <record id="won_reason_price" model="crm.won.reason">
+            <field name="name">Competitive Price</field>
+        </record>
+        <record id="won_reason_quality" model="crm.won.reason">
+            <field name="name">Product Quality/Features</field>
+        </record>
+        <record id="won_reason_trust" model="crm.won.reason">
+            <field name="name">Trust &amp; Relationship</field>
+        </record>
+        <record id="won_reason_speed" model="crm.won.reason">
+            <field name="name">Fast Service/Execution</field>
+        </record>
+        <record id="won_reason_existing" model="crm.won.reason">
+            <field name="name">Existing Happy Customer</field>
+        </record>
+
+        <!-- Churn/Non-Renewal Reasons -->
+        <record id="churn_reason_budget" model="crm.churn.reason">
+            <field name="name">Budget Cuts / Financial Constraints</field>
+        </record>
+        <record id="churn_reason_competitor" model="crm.churn.reason">
+            <field name="name">Moved to Competitor</field>
+        </record>
+        <record id="churn_reason_poor_service" model="crm.churn.reason">
+            <field name="name">Poor Service/Support Experience</field>
+        </record>
+        <record id="churn_reason_no_need" model="crm.churn.reason">
+            <field name="name">No Longer Needed (Business Pivot)</field>
+        </record>
+        <record id="churn_reason_features" model="crm.churn.reason">
+            <field name="name">Missing Essential Features</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="crm_lead_lost_view_form_custom" model="ir.ui.view">
+        <field name="name">crm.lead.lost.form.custom</field>
+        <field name="model">crm.lead.lost</field>
+        <field name="inherit_id" ref="crm.crm_lead_lost_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='lost_reason_id']" position="replace">
+                <field name="is_renewal" invisible="1"/>
+                
+                <!-- If not renewal: standard lost reasons -->
+                <field name="lost_reason_ids" widget="many2many_tags" 
+                       placeholder="Why did we lose it?"
+                       invisible="is_renewal"
+                       required="not is_renewal"/>
+                
+                <!-- If renewal: churn reasons -->
+                <field name="churn_reason_ids" widget="many2many_tags" 
+                       placeholder="Why did they not renew?"
+                       invisible="not is_renewal"
+                       required="is_renewal"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
