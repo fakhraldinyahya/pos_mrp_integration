@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Customize Kanban Quick Create Form -->
+    <record id="quick_create_opportunity_form_custom" model="ir.ui.view">
+        <field name="name">crm.lead.form.quick_create.custom</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.quick_create_opportunity_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[field[@name='name']]" position="replace"/>
+            <xpath expr="//div[field[@name='commercial_partner_id']]" position="before">
+                <div class="d-flex align-items-center" colspan="2">
+                    <i class="fa fa-briefcase" title="Opportunity Name"/>
+                    <field name="name" nolabel="1" placeholder="Opportunity's Name" class="o_field_highlight w-100 mb-0"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Customize Lead/Opportunity Form View -->
+    <record id="crm_lead_view_form_custom" model="ir.ui.view">
+        <field name="name">crm.lead.form.custom</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Opportunity Type and Source -->
+            <xpath expr="//group[@invisible=&quot;type == 'lead'&quot;]/field[@name='tag_ids']" position="after">
+                <field name="opportunity_type" widget="radio" options="{'horizontal': true}"/>
+                <field name="source_id"/>
+            </xpath>
+            <xpath expr="//group[@name='lead_priority']/field[@name='tag_ids']" position="after">
+                <field name="opportunity_type" widget="radio" options="{'horizontal': true}"/>
+                <field name="source_id"/>
+            </xpath>
+
+            <!-- Success/Churn Analysis Section -->
+            <xpath expr="//notebook" position="inside">
+                <page name="won_lost_analysis" string="Success/Churn Analysis">
+                    <group>
+                        <group string="Lost Analysis" invisible="won_status != 'lost'">
+                            <field name="lost_reason_ids" widget="many2many_tags"/>
+                            <field name="lost_reason_id" invisible="1"/>
+                        </group>
+                        <group string="Won Analysis" invisible="won_status != 'won'">
+                            <field name="won_reason_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Churn Analysis" invisible="opportunity_type != 'renewal' or won_status != 'lost'">
+                            <field name="churn_reason_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+            <!-- Replace standard Lost Reason in the header/main section -->
+            <xpath expr="//field[@name='lost_reason_id']" position="replace">
+                <!-- We hide it here as it's now in the Notebook section for better clean interface -->
+                <field name="lost_reason_id" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Customize Opportunity List View -->
+    <record id="crm_case_tree_view_oppor_custom" model="ir.ui.view">
+        <field name="name">crm.lead.list.opportunity.custom</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='lost_reason_id']" position="after">
+                <field name="won_reason_ids" widget="many2many_tags" optional="hide"/>
+                <field name="churn_reason_ids" widget="many2many_tags" optional="hide"/>
+                <field name="opportunity_type" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='lost_reason_id']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='lost_reason_id']" position="after">
+                <field name="lost_reason_ids" widget="many2many_tags" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Customize Search View -->
+    <record id="view_crm_case_leads_filter_custom" model="ir.ui.view">
+        <field name="name">crm.lead.search.custom</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="lost_reason_ids"/>
+                <field name="won_reason_ids"/>
+                <field name="churn_reason_ids"/>
+            </xpath>
+            <xpath expr="//filter[@name='salesperson']" position="before">
+                <filter string="Opportunity Type" name="group_opportunity_type" context="{'group_by':'opportunity_type'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
